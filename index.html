@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#C8102E">
+    <title>Pases de bus</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #C8102E;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        .header-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+            z-index: 3000;
+            transition: right 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-menu.active {
+            right: 0;
+        }
+
+        .side-menu-header {
+            background: #C8102E;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .side-menu-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .side-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .side-menu-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #f5f5f5;
+        }
+
+        .menu-item-text {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 13px;
+            position: relative;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .toggle-switch.active {
+            background: #C8102E;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 26px;
+        }
+
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2500;
+        }
+
+        .menu-overlay.active {
+            display: block;
+        }
+
+        .about-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 4000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .about-modal.active {
+            display: flex;
+        }
+
+        .about-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .about-header {
+            background: #C8102E;
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+        }
+
+        .about-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .about-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .about-body {
+            padding: 24px;
+        }
+
+        .about-section {
+            margin-bottom: 20px;
+        }
+
+        .about-section h3 {
+            color: #C8102E;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .about-section p {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .about-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .about-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .about-link:hover {
+            background: #e0e0e0;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 16px;
+        }
+
+        .disclaimer p {
+            color: #856404;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .passes-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .pass-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .pass-header {
+            padding: 12px 16px;
+            background: #fafafa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pass-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .pass-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        body.edit-mode .pass-actions {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .reorder-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .reorder-btn {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .reorder-btn:hover {
+            background: #444;
+        }
+
+        .reorder-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .delete-btn {
+            background: #C8102E;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .pass-image-container {
+            padding: 16px;
+            background: white;
+        }
+
+        .pass-image {
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+        }
+
+        .add-btn-float {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: #C8102E;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(200, 16, 46, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .add-btn-float:hover {
+            transform: scale(1.1);
+        }
+
+        body.edit-mode .add-btn-float {
+            display: flex;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: flex-end;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .add-modal {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .add-modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #C8102E;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: block;
+        }
+
+        .file-input-btn {
+            background: #f5f5f5;
+            color: #333;
+            padding: 12px 16px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            text-align: center;
+            transition: border-color 0.3s;
+            display: block;
+        }
+
+        .file-input-btn:hover {
+            border-color: #C8102E;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #C8102E;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #a00d25;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .image-modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .empty-state-btn {
+            background: #C8102E;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none;
+        }
+
+        .empty-state-btn:hover {
+            background: #a00d25;
+        }
+
+        body.edit-mode .empty-state-btn {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="logo.svg" alt="Pases de bus" class="logo">
+            <div class="header-title">Pases de bus</div>
+        </div>
+        <button class="menu-btn" id="menuBtn">☰</button>
+    </div>
+
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <div class="side-menu-title">Menú</div>
+            <button class="side-menu-close" id="sideMenuClose">&times;</button>
+        </div>
+        <div class="side-menu-content">
+            <div class="menu-item" id="editMenuItem">
+                <div class="menu-item-text">Editar pases</div>
+                <div class="toggle-switch" id="editToggle"></div>
+            </div>
+            <div class="menu-item" id="aboutMenuItem">
+                <div class="menu-item-text">Acerca de</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="emptyState" class="empty-state">
+            <div class="empty-state-icon">🎫</div>
+            <div class="empty-state-title">No hay pases guardados</div>
+            <div class="empty-state-text">Añade tu primer pase de bus para empezar</div>
+            <button class="empty-state-btn" id="emptyAddBtn">Añadir pase</button>
+        </div>
+
+        <div id="passesGrid" class="passes-grid"></div>
+    </div>
+
+    <button class="add-btn-float" id="addBtnFloat">+</button>
+
+    <div class="modal-overlay" id="addModal">
+        <div class="add-modal">
+            <div class="modal-header">
+                <div class="modal-title">Añadir pase</div>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label for="personName">Nombre</label>
+                <input type="text" id="personName" placeholder="Ej: María, Nacho...">
+            </div>
+
+            <div class="form-group">
+                <label>Imagen del pase</label>
+                <div class="file-input-wrapper">
+                    <div class="file-input-btn">
+                        Seleccionar imagen
+                        <input type="file" id="imageInput" accept="image/*">
+                    </div>
+                </div>
+                <div id="fileName" class="file-name"></div>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" disabled>Guardar pase</button>
+        </div>
+    </div>
+
+    <div class="image-modal" id="imageModal">
+        <button class="image-modal-close" id="imageModalClose">&times;</button>
+        <img id="imageModalImg" class="image-modal-content" src="" alt="">
+    </div>
+
+    <div class="about-modal" id="aboutModal">
+        <div class="about-content">
+            <div class="about-header">
+                <div class="about-title">Acerca de esta aplicación</div>
+                <button class="about-close" id="aboutClose">&times;</button>
+            </div>
+            <div class="about-body">
+                <div class="about-section">
+                    <h3>¿Qué es esta app?</h3>
+                    <p>Una aplicación web para guardar y acceder fácilmente a tus pases de bus. Proyecto personal creado para mi uso y el de mi entorno cercano.</p>
+                </div>
+
+                <div class="about-section">
+                    <h3>Privacidad y seguridad</h3>
+                    <p>Tus imágenes se guardan <strong>únicamente en tu dispositivo</strong>, de forma local. Nunca se envían a internet ni a ningún servidor externo. Todo permanece en tu teléfono.</p>
+                    <p>La aplicación funciona completamente offline una vez instalada.</p>
+                </div>
+
+                <div class="about-section">
+                    <h3>Código fuente</h3>
+                    <p>Este proyecto es de código abierto. Puedes ver el código, reportar bugs o contribuir:</p>
+                    <div class="about-links">
+                        <a href="https://github.com/anaperaita/pases-bus" target="_blank" rel="noopener noreferrer" class="about-link">
+                            <span>📦 Repositorio en GitHub</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="about-section">
+                    <h3>Desarrolladora</h3>
+                    <p><strong>Ana Peraita</strong></p>
+                    <div class="about-links">
+                        <a href="https://github.com/anaperaita" target="_blank" rel="noopener noreferrer" class="about-link">
+                            <span>GitHub</span>
+                        </a>
+                        <a href="https://www.linkedin.com/in/aperaita" target="_blank" rel="noopener noreferrer" class="about-link">
+                            <span>LinkedIn</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+
+        const menuBtn = document.getElementById('menuBtn');
+        const sideMenu = document.getElementById('sideMenu');
+        const sideMenuClose = document.getElementById('sideMenuClose');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const editMenuItem = document.getElementById('editMenuItem');
+        const editToggle = document.getElementById('editToggle');
+        const aboutMenuItem = document.getElementById('aboutMenuItem');
+        const aboutModal = document.getElementById('aboutModal');
+        const aboutClose = document.getElementById('aboutClose');
+        const addBtnFloat = document.getElementById('addBtnFloat');
+        const emptyAddBtn = document.getElementById('emptyAddBtn');
+        const addModal = document.getElementById('addModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const personNameInput = document.getElementById('personName');
+        const imageInput = document.getElementById('imageInput');
+        const fileNameDiv = document.getElementById('fileName');
+        const submitBtn = document.getElementById('submitBtn');
+        const passesGrid = document.getElementById('passesGrid');
+        const emptyState = document.getElementById('emptyState');
+        const imageModal = document.getElementById('imageModal');
+        const imageModalImg = document.getElementById('imageModalImg');
+        const imageModalClose = document.getElementById('imageModalClose');
+
+        let selectedImage = null;
+
+        function loadPasses() {
+            const passes = JSON.parse(localStorage.getItem('busPasses') || '[]');
+
+            if (passes.length === 0) {
+                emptyState.style.display = 'block';
+                passesGrid.style.display = 'none';
+                document.body.classList.add('edit-mode');
+                editToggle.classList.add('active');
+            } else {
+                emptyState.style.display = 'none';
+                passesGrid.style.display = 'grid';
+
+                passesGrid.innerHTML = passes.map((pass, index) => `
+                    <div class="pass-card">
+                        <div class="pass-header">
+                            <div class="pass-name">${escapeHtml(pass.name)}</div>
+                            <div class="pass-actions">
+                                <div class="reorder-btns">
+                                    <button class="reorder-btn" onclick="movePass(${index}, -1)" ${index === 0 ? 'disabled' : ''}>↑</button>
+                                    <button class="reorder-btn" onclick="movePass(${index}, 1)" ${index === passes.length - 1 ? 'disabled' : ''}>↓</button>
+                                </div>
+                                <button class="delete-btn" onclick="deletePass(${index})">Eliminar</button>
+                            </div>
+                        </div>
+                        <div class="pass-image-container">
+                            <img src="${pass.image}" alt="${escapeHtml(pass.name)}" class="pass-image" onclick="openImageModal('${pass.image}')">
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function checkForm() {
+            submitBtn.disabled = !(personNameInput.value.trim() && selectedImage);
+        }
+
+        function openAddModal() {
+            addModal.classList.add('active');
+        }
+
+        function closeAddModal() {
+            addModal.classList.remove('active');
+            personNameInput.value = '';
+            imageInput.value = '';
+            fileNameDiv.textContent = '';
+            selectedImage = null;
+            checkForm();
+        }
+
+        function openSideMenu() {
+            sideMenu.classList.add('active');
+            menuOverlay.classList.add('active');
+        }
+
+        function closeSideMenu() {
+            sideMenu.classList.remove('active');
+            menuOverlay.classList.remove('active');
+        }
+
+        function openAboutModal() {
+            aboutModal.classList.add('active');
+            closeSideMenu();
+        }
+
+        function closeAboutModal() {
+            aboutModal.classList.remove('active');
+        }
+
+        menuBtn.addEventListener('click', openSideMenu);
+        sideMenuClose.addEventListener('click', closeSideMenu);
+        menuOverlay.addEventListener('click', closeSideMenu);
+
+        editMenuItem.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        editToggle.addEventListener('click', () => {
+            document.body.classList.toggle('edit-mode');
+            editToggle.classList.toggle('active');
+        });
+
+        aboutMenuItem.addEventListener('click', openAboutModal);
+        aboutClose.addEventListener('click', closeAboutModal);
+
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) {
+                closeAboutModal();
+            }
+        });
+
+        addBtnFloat.addEventListener('click', openAddModal);
+        emptyAddBtn.addEventListener('click', openAddModal);
+        modalCloseBtn.addEventListener('click', closeAddModal);
+
+        addModal.addEventListener('click', (e) => {
+            if (e.target === addModal) {
+                closeAddModal();
+            }
+        });
+
+        personNameInput.addEventListener('input', checkForm);
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileNameDiv.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    selectedImage = event.target.result;
+                    checkForm();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        submitBtn.addEventListener('click', () => {
+            const passes = JSON.parse(localStorage.getItem('busPasses') || '[]');
+            passes.push({
+                name: personNameInput.value.trim(),
+                image: selectedImage
+            });
+            localStorage.setItem('busPasses', JSON.stringify(passes));
+
+            closeAddModal();
+            loadPasses();
+
+            // If adding first pass, exit edit mode
+            if (passes.length === 1) {
+                document.body.classList.remove('edit-mode');
+                editToggle.classList.remove('active');
+            }
+        });
+
+        window.movePass = (index, direction) => {
+            const passes = JSON.parse(localStorage.getItem('busPasses') || '[]');
+            const newIndex = index + direction;
+
+            if (newIndex >= 0 && newIndex < passes.length) {
+                const temp = passes[index];
+                passes[index] = passes[newIndex];
+                passes[newIndex] = temp;
+
+                localStorage.setItem('busPasses', JSON.stringify(passes));
+                loadPasses();
+            }
+        };
+
+        window.deletePass = (index) => {
+            if (confirm('¿Eliminar este pase?')) {
+                const passes = JSON.parse(localStorage.getItem('busPasses') || '[]');
+                passes.splice(index, 1);
+                localStorage.setItem('busPasses', JSON.stringify(passes));
+                loadPasses();
+            }
+        };
+
+        window.openImageModal = (imageSrc) => {
+            imageModalImg.src = imageSrc;
+            imageModal.classList.add('active');
+        };
+
+        imageModalClose.addEventListener('click', () => {
+            imageModal.classList.remove('active');
+        });
+
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                imageModal.classList.remove('active');
+            }
+        });
+
+        loadPasses();
+    </script>
+</body>
+</html>

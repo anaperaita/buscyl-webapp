@@ -1,0 +1,24 @@
+{
+  "name": "Pases de bus",
+  "short_name": "Pases bus",
+  "description": "Gestiona tus pases de bus",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#C8102E",
+  "theme_color": "#C8102E",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./logo.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
